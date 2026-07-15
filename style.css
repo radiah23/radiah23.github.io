@@ -239,7 +239,7 @@ a { color: inherit; }
   margin-bottom: 6px;
 }
 .tl-item__card {
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 18px 20px;
@@ -278,7 +278,7 @@ a { color: inherit; }
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--paper);
   color: var(--muted);
   cursor: pointer;
 }
@@ -294,7 +294,7 @@ a { color: inherit; }
   gap: 16px;
 }
 .project-card {
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 18px 20px;
@@ -366,7 +366,7 @@ a { color: inherit; }
   gap: 16px;
 }
 .involvement-card {
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 18px 20px;
