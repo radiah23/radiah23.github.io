@@ -397,6 +397,9 @@ a { color: inherit; }
 .involvement-card__position h3 { margin: 0 0 2px; font-size: 15px; font-weight: 700; }
 .involvement-card__position p { font-size: 14px; margin: 0 0 8px; }
 .involvement-card__position p:last-child { margin: 0; }
+.involvement-card ul, .involvement-card__position ul { margin: 0; padding-left: 18px; }
+.involvement-card li, .involvement-card__position li { margin-bottom: 6px; font-size: 14px; }
+.involvement-card li:last-child, .involvement-card__position li:last-child { margin-bottom: 0; }
 
 /* ============ Footer ============ */
 .site-footer {
