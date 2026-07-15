@@ -375,6 +375,29 @@ a { color: inherit; }
 .involvement-card__org { margin: 0 0 10px; color: var(--accent); font-size: 13px; font-weight: 600; }
 .involvement-card p:last-child { margin: 0; font-size: 14px; }
 
+/* Grouped card (multi-position) */
+.involvement-card--group {
+  grid-column: 1 / -1;
+  padding: 0;
+  overflow: hidden;
+}
+.involvement-card__header {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  padding: 14px 20px;
+}
+.involvement-card__position {
+  padding: 16px 20px;
+  border-top: 1px solid var(--line);
+}
+.involvement-card__position:first-of-type { border-top: none; }
+.involvement-card__position h3 { margin: 0 0 2px; font-size: 15px; font-weight: 700; }
+.involvement-card__position p { font-size: 14px; margin: 0 0 8px; }
+.involvement-card__position p:last-child { margin: 0; }
+
 /* ============ Footer ============ */
 .site-footer {
   border-top: 1px solid var(--line);
