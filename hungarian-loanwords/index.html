@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where Does This Hungarian Word Come From? · Radiah Khan</title>
+<meta name="description" content="A deep learning project predicting whether a Hungarian word is native Uralic or a German, Slavic or Turkic loanword. Live code, data and results.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #1e1e1e;
+  --paper: #252526;
+  --paper-2: #2d2d2d;
+  --ink: #e6e6e3;
+  --ink-2: #c3c2b7;
+  --muted: #8f8e88;
+  --line: #3c3c3c;
+  --accent: #3987e5;
+  --gold: #dcdcaa;
+  --ok: #0ca30c;
+
+  /* class identity: validated categorical slots 1-4 (dark), always paired with a text label */
+  --c-inherited: #3987e5;
+  --c-german:    #d95926;
+  --c-slavic:    #199e70;
+  --c-turkic:    #c98500;
+
+  /* sequential blue ramp for the confusion matrix */
+  --seq-0: #1f2a38;
+
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --maxw: 1080px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono { font-family: var(--mono); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+/* ---------- top bar ---------- */
+.topbar { position: sticky; top: 0; z-index: 20; background: rgba(30,30,30,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+.topbar-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 18px; font-family: var(--mono); font-size: 12.5px; }
+.crumb { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crumb a { color: var(--ink-2); }
+.topnav { margin-left: auto; display: flex; gap: 16px; }
+.topnav a { color: var(--ink-2); }
+@media (max-width: 760px) { .topnav { display: none; } }
+
+main { max-width: var(--maxw); margin: 0 auto; padding: 0 24px 80px; }
+section { padding: 56px 0 8px; scroll-margin-top: 50px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
+h1 { font-size: clamp(32px, 5.2vw, 54px); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 18px; font-weight: 700; }
+h2 { font-size: 26px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -0.01em; }
+h3 { font-size: 16px; margin: 0 0 6px; }
+.lede { font-size: 18px; color: var(--ink-2); max-width: 720px; margin: 0 0 22px; }
+.sub { color: var(--ink-2); max-width: 740px; margin: 0 0 22px; }
+.muted { color: var(--muted); }
+
+/* ---------- hero ---------- */
+.hero { padding-top: 64px; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; margin-bottom: 22px; background: var(--paper); }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(12,163,12,.6); animation: pulse 2s infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(12,163,12,0); } 100% { box-shadow: 0 0 0 0 rgba(12,163,12,0); } }
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+.hero h1 .q { color: var(--gold); }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 28px; }
+.btn { font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); display: inline-flex; gap: 8px; align-items: center; }
+.btn:hover { border-color: var(--accent); text-decoration: none; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px; }
+.kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.kpi .v { font-family: var(--mono); font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.kpi .l { color: var(--muted); font-size: 13px; }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- panels ---------- */
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 22px; min-width: 0; }
+.grid2 > *, .grid4 > *, .try > *, .ms > * { min-width: 0; }
+@media (max-width: 640px) { .panel { padding: 16px; } main { padding: 0 16px 60px; } }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 860px) { .grid2, .grid4 { grid-template-columns: 1fr; } }
+.panel-title { font-weight: 600; margin: 0 0 4px; }
+.panel-sub { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+
+/* class chip */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.chip::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+
+/* ---------- try it ---------- */
+.try { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; }
+@media (max-width: 860px) { .try { grid-template-columns: 1fr; } }
+.inputrow { display: flex; gap: 8px; }
+.inputrow input { flex: 1; font-family: var(--mono); font-size: 22px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); min-width: 0; }
+.inputrow input:focus { outline: none; border-color: var(--accent); }
+.examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.examples button { font-family: var(--mono); font-size: 12.5px; background: var(--paper-2); color: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.examples button:hover { color: var(--ink); border-color: var(--muted); }
+.probs { display: grid; gap: 10px; margin-top: 4px; }
+.prob { display: grid; grid-template-columns: 92px 1fr 52px; align-items: center; gap: 10px; }
+.prob .track { height: 18px; background: var(--paper-2); border-radius: 4px; overflow: hidden; }
+.prob .fill { height: 100%; background: var(--c); border-radius: 0 4px 4px 0; transition: width .35s ease; }
+.prob .pct { font-family: var(--mono); font-size: 13px; text-align: right; color: var(--ink-2); }
+.verdict { margin: 0 0 14px; font-size: 15px; }
+.verdict strong { font-family: var(--mono); }
+.known { font-size: 13px; color: var(--ink-2); background: var(--paper-2); border-left: 3px solid var(--gold); padding: 8px 10px; border-radius: 4px; margin-top: 14px; }
+.ngrams { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ng { font-family: var(--mono); font-size: 12px; padding: 3px 8px; border-radius: 4px; background: var(--paper-2); border: 1px solid var(--line); white-space: pre; }
+.ng b { font-weight: 500; color: var(--muted); margin-left: 6px; }
+.note { font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+
+/* ---------- class cards ---------- */
+.ccard { background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--c); border-radius: 10px; padding: 16px; }
+.ccard .words { font-family: var(--mono); font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+.ccard p { font-size: 13.5px; color: var(--ink-2); margin: 6px 0 0; }
+
+/* ---------- pipeline ---------- */
+.pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; counter-reset: step; }
+.step { position: relative; padding: 16px 14px 16px 16px; background: var(--paper); border: 1px solid var(--line); margin-right: -1px; }
+.step:first-child { border-radius: 10px 0 0 10px; }
+.step:last-child { border-radius: 0 10px 10px 0; }
+.step::before { counter-increment: step; content: "0" counter(step); font-family: var(--mono); font-size: 11px; color: var(--gold); display: block; margin-bottom: 6px; }
+.step h3 { font-size: 14px; }
+.step p { font-size: 12.8px; color: var(--ink-2); margin: 0; }
+.step .tool { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 8px; display: block; }
+@media (max-width: 860px) { .pipe { grid-template-columns: 1fr; } .step, .step:first-child, .step:last-child { border-radius: 0; margin: 0 0 -1px; } }
+
+/* ---------- charts ---------- */
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 96px 1fr 70px; align-items: center; gap: 10px; font-size: 13px; position: relative; }
+.bar .lab { color: var(--ink-2); }
+.bar .track { height: 20px; position: relative; }
+.bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--c, var(--accent)); border-radius: 0 4px 4px 0; }
+.bar .val { font-family: var(--mono); color: var(--ink); text-align: right; }
+.bar:hover .fill { filter: brightness(1.15); }
+.axisnote { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+/* results chart (macro-F1 with whiskers) */
+.rchart { display: grid; gap: 14px; }
+.rrow { display: grid; grid-template-columns: 150px 1fr 110px; align-items: center; gap: 12px; }
+.rrow .name { font-size: 14px; }
+.rrow .name small { display: block; color: var(--muted); font-size: 12px; }
+.rtrack { position: relative; height: 22px; border-left: 1px solid var(--line); }
+.rtrack .grid { position: absolute; top: -4px; bottom: -4px; width: 1px; background: #333; }
+.rtrack .fill { position: absolute; left: 0; top: 2px; bottom: 2px; background: #5a5a58; border-radius: 0 4px 4px 0; }
+.rrow.best .rtrack .fill { background: var(--accent); }
+.rtrack .wh { position: absolute; top: 50%; height: 2px; background: var(--ink); transform: translateY(-50%); }
+.rtrack .wh::before, .rtrack .wh::after { content: ""; position: absolute; top: -5px; width: 2px; height: 12px; background: var(--ink); }
+.rtrack .wh::before { left: 0; } .rtrack .wh::after { right: 0; }
+.rrow .num { font-family: var(--mono); font-size: 13px; text-align: right; }
+.rrow .num small { color: var(--muted); }
+.raxis { display: grid; grid-template-columns: 150px 1fr 110px; gap: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.raxis .ticks { position: relative; height: 14px; }
+.raxis .ticks span { position: absolute; transform: translateX(-50%); }
+@media (max-width: 640px) { .rrow { grid-template-columns: 1fr 96px; row-gap: 4px; } .rrow .name { grid-column: 1 / -1; } .rrow .name small { display: inline; margin-left: 6px; } .raxis { grid-template-columns: 0 1fr 96px; gap: 0 12px; } .rrow .num small { display: block; } }
+
+/* recall dot plot */
+.dots { display: grid; gap: 12px; }
+.drow { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 12px; }
+.dtrack { position: relative; height: 22px; border-bottom: 1px solid var(--line); }
+.dtrack .link { position: absolute; top: 10px; height: 2px; background: #555; }
+.dot { position: absolute; top: 11px; width: 12px; height: 12px; border-radius: 50%; transform: translate(-50%, -50%); cursor: default; }
+.dot.ng { background: var(--ink); box-shadow: 0 0 0 2px var(--paper); }
+.dot.gru { background: var(--paper); border: 2px solid var(--ink); }
+.legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin-bottom: 12px; flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.lg-ng { width: 11px; height: 11px; border-radius: 50%; background: var(--ink); display: inline-block; }
+.lg-gru { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; }
+
+/* confusion matrix */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; margin-bottom: 14px; }
+.seg button { font-family: var(--mono); font-size: 12.5px; background: transparent; color: var(--ink-2); border: 0; padding: 6px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--paper-2); color: var(--ink); }
+.cm { border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 13px; }
+.cm th { font-weight: 500; color: var(--ink-2); font-size: 12px; padding: 4px 8px; }
+.cm th.rowh { text-align: right; }
+.cm td { width: 74px; height: 50px; text-align: center; border-radius: 4px; transition: background .25s; }
+.cm caption { caption-side: bottom; color: var(--muted); font-size: 12px; padding-top: 8px; text-align: left; font-family: var(--sans); }
+.cmwrap { overflow-x: auto; }
+
+/* tooltip */
+.tip { position: fixed; pointer-events: none; z-index: 50; background: #111; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; font-size: 12.5px; font-family: var(--mono); opacity: 0; transition: opacity .1s; max-width: 260px; }
+
+/* tables */
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th { text-align: left; font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--line); padding: 8px 10px; font-size: 13px; }
+table.t td { border-bottom: 1px solid #333; padding: 9px 10px; vertical-align: top; }
+table.t td.n { font-family: var(--mono); text-align: right; white-space: nowrap; }
+table.t tr.best td { background: rgba(57,135,229,.08); }
+.tablewrap { overflow-x: auto; }
+
+/* code */
+pre.snip { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 12.8px; line-height: 1.55; margin: 0; }
+pre.snip code { font-family: var(--mono); background: transparent; padding: 0; }
+
+/* ---------- code browser ---------- */
+.ide { display: grid; grid-template-columns: 260px 1fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--paper); min-height: 560px; }
+@media (max-width: 860px) { .ide { grid-template-columns: 1fr; } }
+.ide-side { border-right: 1px solid var(--line); background: #232324; display: flex; flex-direction: column; }
+.ide-head { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 12px 14px 8px; display: flex; justify-content: space-between; align-items: center; }
+.ide-files { list-style: none; margin: 0; padding: 0 0 10px; overflow-y: auto; max-height: 560px; }
+.ide-files button { width: 100%; text-align: left; background: transparent; border: 0; color: var(--ink-2); font-family: var(--mono); font-size: 12.8px; padding: 5px 14px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+.ide-files button:hover { background: #2a2d2e; color: var(--ink); }
+.ide-files button[aria-current="true"] { background: #37373d; color: #fff; }
+.ide-files .sz { color: var(--muted); font-size: 11px; white-space: nowrap; flex: none; }
+.ide-files button span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ide-files .grp { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 10px 14px 4px; }
+.ide-main { display: flex; flex-direction: column; min-width: 0; }
+.ide-tab { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); background: #2d2d2d; padding: 0 12px; font-family: var(--mono); font-size: 12.5px; min-height: 38px; }
+.ide-tab .name { color: var(--ink); border-bottom: 2px solid var(--accent); padding: 9px 2px; }
+.ide-tab a { font-size: 12px; }
+.ide-body { overflow: auto; max-height: 640px; flex: 1; }
+.ide-body pre { margin: 0; padding: 14px 0; font-size: 12.8px; line-height: 1.6; counter-reset: ln; }
+.ide-body pre code { font-family: var(--mono); background: transparent !important; padding: 0 !important; display: block; }
+.ide-body .ln { display: block; padding: 0 16px 0 0; white-space: pre; }
+.ide-body .ln::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 3.4em; padding-right: 1.2em; text-align: right; color: #5a5a5a; user-select: none; }
+.ide-body .loading { padding: 20px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+.nb-cell { border-bottom: 1px solid #333; padding: 12px 18px; }
+.nb-cell.md { font-size: 14.5px; color: var(--ink-2); }
+.nb-cell.md h1, .nb-cell.md h2, .nb-cell.md h3 { color: var(--ink); margin: 6px 0; font-size: 17px; }
+.nb-cell.md table { border-collapse: collapse; font-size: 13px; } .nb-cell.md td, .nb-cell.md th { border: 1px solid var(--line); padding: 4px 8px; }
+.nb-in { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.nb-cell pre { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; margin: 0; overflow-x: auto; }
+.nb-out { margin-top: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); white-space: pre; overflow-x: auto; background: #1b1b1b; border-left: 2px solid var(--line); padding: 8px 10px; }
+.nb-out img { max-width: 100%; background: #fff; border-radius: 4px; }
+.csvt { border-collapse: collapse; font-family: var(--mono); font-size: 12px; margin: 12px 16px; }
+.csvt th, .csvt td { border: 1px solid #3a3a3a; padding: 4px 8px; white-space: nowrap; text-align: left; }
+.csvt th { color: var(--gold); font-weight: 500; position: sticky; top: 0; background: #2a2a2a; }
+.md-file { padding: 10px 22px; font-size: 14.5px; color: var(--ink-2); }
+.md-file h1, .md-file h2, .md-file h3 { color: var(--ink); }
+.md-file table { border-collapse: collapse; font-size: 13px; } .md-file td, .md-file th { border: 1px solid var(--line); padding: 5px 9px; }
+.md-file code { background: #2d2d2d; padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+.md-file pre code { background: transparent; padding: 0; }
+.md-file pre { background: var(--bg); border: 1px solid var(--line); padding: 10px 12px; border-radius: 6px; overflow-x: auto; }
+
+/* commits */
+.commits { list-style: none; margin: 0; padding: 0; }
+.commits li { display: grid; grid-template-columns: 92px 1fr auto; gap: 12px; padding: 9px 0; border-bottom: 1px solid #333; font-size: 13.5px; align-items: baseline; }
+.commits .d { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.commits .m { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.commits .a { font-family: var(--mono); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.commits .sha { font-family: var(--mono); font-size: 11.5px; margin-left: 8px; }
+.livebadge { font-family: var(--mono); font-size: 11px; color: var(--ok); border: 1px solid rgba(12,163,12,.4); padding: 1px 7px; border-radius: 999px; text-transform: none; letter-spacing: 0; }
+.livebadge.off { color: var(--muted); border-color: var(--line); }
+
+/* explorer */
+.xbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+.xbar input { font-family: var(--mono); font-size: 14px; padding: 8px 11px; background: var(--bg); border: 1px solid var(--line); border-radius: 7px; color: var(--ink); width: 220px; }
+.xbar input:focus { outline: none; border-color: var(--accent); }
+.fchip { font-family: var(--mono); font-size: 12px; background: transparent; color: var(--ink-2); border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.fchip[aria-pressed="true"] { border-color: var(--ink-2); color: var(--ink); background: var(--paper-2); }
+.fchip i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); display: inline-block; }
+.xgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
+.xw { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--bg); border: 1px solid #333; border-left: 3px solid var(--c); border-radius: 5px; padding: 5px 9px; font-family: var(--mono); font-size: 13px; cursor: pointer; }
+.xw:hover { border-color: var(--muted); border-left-color: var(--c); }
+.xw span { color: var(--muted); font-size: 11px; }
+.xcount { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: auto; }
+
+/* milestones */
+.ms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 860px) { .ms { grid-template-columns: 1fr; } }
+.ms .panel h3 { display: flex; align-items: center; gap: 8px; }
+.tag { font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.tag.done { color: var(--ok); border-color: rgba(12,163,12,.45); }
+.tag.now { color: var(--gold); border-color: rgba(220,220,170,.45); }
+.ms ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 13.5px; }
+
+footer { border-top: 1px solid var(--line); margin-top: 60px; padding: 26px 0 0; color: var(--muted); font-size: 13px; }
+footer p { margin: 0 0 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-inner">
+  <span class="crumb"><a href="/">radiah23.github.io</a> / projects / hungarian-loanwords</span>
+  <nav class="topnav" aria-label="Sections">
+    <a href="#try">try it</a><a href="#data">data</a><a href="#results">results</a><a href="#code">code</a><a href="#words">words</a>
+  </nav>
+</div></div>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="status"><span class="pulse" aria-hidden="true"></span> Ongoing project · Milestone 1 submitted</div>
+  <h1>Where does this <span class="q">Hungarian word</span> come from?</h1>
+  <p class="lede">Hungarian is a Uralic language, but over a thousand years it has borrowed heavily from its neighbors. We train models to read a single word, letter by letter, and guess whether it is <strong>native</strong> or a <strong>German</strong>, <strong>Slavic</strong> or <strong>Turkic</strong> loanword.</p>
+  <p class="sub">Team Winners: <strong>Joy, Radiah and Ellie</strong> · Deep Learning, Fall 2026. Everything below comes straight from the team repository: the code panel and project log update live as we push.</p>
+  <div class="btns">
+    <a class="btn primary" href="https://github.com/inthecrowsnest/DeepLearningProject" target="_blank" rel="noopener">⌥ GitHub repository</a>
+    <a class="btn" href="https://colab.research.google.com/github/inthecrowsnest/DeepLearningProject/blob/main/m1_updated_model.ipynb" target="_blank" rel="noopener">▶ Run the notebook in Colab</a>
+    <a class="btn" href="#code">{ } Browse the code</a>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="v">980</div><div class="l">labeled words after cleaning</div></div>
+    <div class="kpi"><div class="v">4</div><div class="l">origin classes</div></div>
+    <div class="kpi"><div class="v">0.609</div><div class="l">best macro-F1 (char n-grams)</div></div>
+    <div class="kpi"><div class="v">10,452</div><div class="l">parameters in the char-GRU</div></div>
+  </div>
+</section>
+
+<!-- ============ TRY IT ============ -->
+<section id="try">
+  <p class="eyebrow">Try it</p>
+  <h2>Type a Hungarian word</h2>
+  <p class="sub">This runs our character n-gram baseline, the best model from Milestone 1, right in your browser. It sees only the spelling of the word: no dictionary, no context. It's right about 64% of the time, so expect some confident mistakes.</p>
+  <div class="try">
+    <div class="panel">
+      <label for="word" class="sr">Hungarian word</label>
+      <div class="inputrow"><input id="word" type="text" value="paprika" autocomplete="off" spellcheck="false" placeholder="e.g. kenyér"></div>
+      <div class="examples" id="examples" aria-label="Example words"></div>
+      <div id="known"></div>
+      <div class="note">Try a lemma (dictionary form): <code>ablak</code>, not <code>ablakot</code>. Accents matter: <code>kerek</code> and <code>kerék</code> are different words.</div>
+    </div>
+    <div class="panel" aria-live="polite">
+      <p class="verdict" id="verdict">Loading model…</p>
+      <div class="probs" id="probs"></div>
+      <p class="panel-sub" style="margin:18px 0 0">Letter sequences that pushed the guess hardest</p>
+      <div class="ngrams" id="ngrams"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TASK ============ -->
+<section id="task">
+  <p class="eyebrow">The task</p>
+  <h2>Four classes, one word at a time</h2>
+  <p class="sub">The input is a single lemma. The output is one of four origins. These are the most frequent words of each class in our subtitle data:</p>
+  <div class="grid4">
+    <div class="ccard" style="--c:var(--c-inherited)"><span class="chip" style="--c:var(--c-inherited)">native (Uralic)</span><p>Inherited from Proto-Uralic and Proto-Finno-Ugric.</p><div class="words">tud · jön · mond · megy · lát · ember</div></div>
+    <div class="ccard" style="--c:var(--c-german)"><span class="chip" style="--c:var(--c-german)">German</span><p>Borrowed from German over many centuries of contact.</p><div class="words">fegyver · pont · kapitány · cél · herceg · vicc</div></div>
+    <div class="ccard" style="--c:var(--c-slavic)"><span class="chip" style="--c:var(--c-slavic)">Slavic</span><p>Borrowed from neighboring Slavic languages after the Hungarians settled.</p><div class="words">csinál · rend · dolog · baj · munka · pénz</div></div>
+    <div class="ccard" style="--c:var(--c-turkic)"><span class="chip" style="--c:var(--c-turkic)">Turkic</span><p>Mostly old West Old Turkic loans, from before the settlement.</p><div class="words">köszön · idő · apa · kis · erő · kép</div></div>
+  </div>
+</section>
+
+<!-- ============ PIPELINE / DATA ============ -->
+<section id="data">
+  <p class="eyebrow">Data pipeline</p>
+  <h2>From film subtitles to labeled words</h2>
+  <p class="sub">We wanted words people actually say, so the vocabulary comes from Hungarian film subtitles. The labels come from etymology databases.</p>
+  <div class="pipe">
+    <div class="step"><h3>Read subtitles</h3><p>Hungarian OpenSubtitles (OPUS v2024), streamed from a 5 GB zip in shuffled file order without unzipping.</p><span class="tool">preprocessing_updated.py</span></div>
+    <div class="step"><h3>Lemmatize</h3><p>Tokenize and lemmatize; drop stop words, punctuation and non-alphabetic tokens; lowercase.</p><span class="tool">HuSpaCy hu_core_news_lg</span></div>
+    <div class="step"><h3>Label</h3><p>Look up each lemma in a label table built from Hungarian Wiktionary, with Turkic loans from CLDF. 2,075 words fall in the four classes.</p><span class="tool">build_table.py</span></div>
+    <div class="step"><h3>Clean</h3><p>Keep each lemma once with its subtitle count; stop at 1,000. Remove pronouns, names and lemmatizer junk: 980 remain.</p><span class="tool">tokens_dataset_updated.csv</span></div>
+    <div class="step"><h3>Evaluate</h3><p>5-fold stratified cross-validation by word; 15% of each training fold held out for early stopping. Primary metric: macro-F1.</p><span class="tool">m1_updated_model.ipynb</span></div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel">
+      <p class="panel-title">Words per class</p>
+      <p class="panel-sub">980 words; native words are the largest class (38%)</p>
+      <div class="bars" id="classBars"></div>
+    </div>
+    <div class="panel">
+      <p class="panel-title">How often each class is spoken</p>
+      <p class="panel-sub">Median subtitle count per word: native words are far more frequent</p>
+      <div class="bars" id="freqBars"></div>
+      <p class="axisnote">This is why a frequency-only model already beats guessing: very common words tend to be native.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODELS ============ -->
+<section id="models">
+  <p class="eyebrow">Models</p>
+  <h2>Three baselines and a character-level GRU</h2>
+  <div class="grid2">
+    <div class="panel">
+      <div class="tablewrap"><table class="t">
+        <thead><tr><th>Model</th><th>What it sees</th></tr></thead>
+        <tbody>
+          <tr><td>Majority class</td><td>Nothing: always predicts “native”</td></tr>
+          <tr><td>Frequency only</td><td>Log subtitle count → logistic regression</td></tr>
+          <tr><td>Char n-gram LR</td><td>TF-IDF of 2–4 letter sequences → class-balanced logistic regression</td></tr>
+          <tr><td>Char-GRU</td><td>The word as a sequence of characters → bidirectional GRU</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">The GRU passes a sanity check: with dropout off, it drives the training loss on 20 words (5 per class) to 0.0000 at 100% accuracy, so the model can learn and the training loop works.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-title">Char-GRU architecture</p>
+      <p class="panel-sub">34 characters + pad/start/end tokens · weighted cross-entropy · Adam · early stopping on validation macro-F1</p>
+<pre class="snip"><code class="language-python">class CharGRU(nn.Module):
+    def __init__(self, dropout=0.3):
+        super().__init__()
+        self.emb  = nn.Embedding(37, 16, padding_idx=0)
+        self.gru  = nn.GRU(16, 32, batch_first=True,
+                           bidirectional=True)
+        self.drop = nn.Dropout(dropout)
+        self.out  = nn.Linear(2 * 32, 4)
+
+    def forward(self, x, lengths):
+        packed = pack_padded_sequence(self.emb(x), lengths,
+                     batch_first=True, enforce_sorted=False)
+        _, h = self.gru(packed)          # last state, both directions
+        return self.out(self.drop(torch.cat([h[0], h[1]], dim=1)))</code></pre>
+      <p class="note">lr 3e-3 · weight decay 1e-4 · batch 32 · up to 100 epochs, patience 15 · best epochs per fold: 8, 25, 12, 26, 11</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="results">
+  <p class="eyebrow">Milestone 1 results</p>
+  <h2>Spelling carries real signal, but the GRU doesn't beat n-grams yet</h2>
+  <p class="sub">Both character models more than quadruple the majority baseline's macro-F1. The GRU lands just below the n-gram model, a gap within the fold-to-fold variation, and its scores are much more stable across folds.</p>
+
+  <div class="panel">
+    <p class="panel-title">Macro-F1 by model</p>
+    <p class="panel-sub">Mean over 5 folds; whiskers show ± 1 standard deviation. Hover a bar for accuracy.</p>
+    <div class="rchart" id="rchart"></div>
+    <div class="raxis" style="margin-top:6px"><span></span><div class="ticks" id="rticks"></div><span></span></div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="panel">
+      <p class="panel-title">Recall by class</p>
+      <p class="panel-sub">Share of each class's words that the model labels correctly</p>
+      <div class="legend"><span><i class="lg-ng"></i>Char n-gram LR</span><span><i class="lg-gru"></i>Char-GRU</span></div>
+      <div class="dots" id="dots"></div>
+      <div class="raxis" style="grid-template-columns:96px 1fr;margin-top:6px"><span></span><div class="ticks" id="dticks"></div></div>
+      <p class="axisnote">The models diverge most on Turkic words: the GRU finds 48% of them, the n-gram model 57%.</p>
+    </div>
+    <div class="panel">
+      <p class="panel-title">Where the models get confused</p>
+      <p class="panel-sub">Row-normalized confusion matrix over all folds (rows: true class)</p>
+      <div class="seg" role="group" aria-label="Model"><button type="button" aria-pressed="true" data-m="ng">Char n-gram LR</button><button type="button" aria-pressed="false" data-m="gru">Char-GRU</button></div>
+      <div class="cmwrap"><table class="cm" id="cm"></table></div>
+      <p class="axisnote">The biggest error for both models: 23% of Turkic words are mistaken for native words. A likely reason: Old Turkic loans are over a thousand years old and have had time to take on Hungarian sound patterns.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <p class="panel-title">Full results table</p>
+    <div class="tablewrap"><table class="t" id="rtable">
+      <thead><tr><th>Model</th><th style="text-align:right">Accuracy</th><th style="text-align:right">Macro-F1</th><th style="text-align:right">Native</th><th style="text-align:right">German</th><th style="text-align:right">Slavic</th><th style="text-align:right">Turkic</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="note">Mean ± std over 5 stratified folds. Class columns are recall.</p>
+  </div>
+</section>
+
+<!-- ============ ROADMAP ============ -->
+<section id="roadmap">
+  <p class="eyebrow">Progress</p>
+  <h2>Where the project stands</h2>
+  <div class="ms">
+    <div class="panel"><h3>Data &amp; labels <span class="tag done">done</span></h3><ul><li>Label table from Wiktionary (kaikki.org) + CLDF Turkic loans</li><li>Subtitle → lemma pipeline with HuSpaCy</li><li>980 cleaned words with frequencies</li></ul></div>
+    <div class="panel"><h3>Milestone 1 <span class="tag done">submitted</span></h3><ul><li>Three baselines + char-GRU</li><li>5-fold CV, macro-F1</li><li>Error analysis: Turkic ↔ native confusion</li></ul></div>
+    <div class="panel"><h3>Next milestone <span class="tag now">in progress</span></h3><ul><li>Work continues in the repository. Follow along in the live project log below.</li></ul></div>
+  </div>
+</section>
+
+<!-- ============ CODE ============ -->
+<section id="code">
+  <p class="eyebrow">Code</p>
+  <h2>The repository, live</h2>
+  <p class="sub">Files load straight from <a href="https://github.com/inthecrowsnest/DeepLearningProject" target="_blank" rel="noopener">inthecrowsnest/DeepLearningProject</a>, so this is always the latest pushed version. Notebooks render with their saved outputs; CSVs show their first 100 rows.</p>
+  <div class="ide">
+    <aside class="ide-side">
+      <div class="ide-head">Explorer <span class="livebadge off" id="treeBadge">snapshot</span></div>
+      <ul class="ide-files" id="files"></ul>
+    </aside>
+    <div class="ide-main">
+      <div class="ide-tab"><span class="name" id="fname">README.md</span><a id="fgh" href="#" target="_blank" rel="noopener">open on GitHub ↗</a></div>
+      <div class="ide-body" id="fbody"><div class="loading">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="ide-head" style="padding:0 0 8px"><span style="font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink);font-family:var(--sans);font-weight:600">Project log</span><span class="livebadge off" id="logBadge">loading</span></div>
+    <ul class="commits" id="commits"></ul>
+  </div>
+</section>
+
+<!-- ============ WORDS ============ -->
+<section id="words">
+  <p class="eyebrow">Dataset</p>
+  <h2>All 980 words</h2>
+  <p class="sub">The full training set, sorted by how often each word appears in the subtitles. Click a word to send it to the model above.</p>
+  <div class="panel">
+    <div class="xbar">
+      <label for="xq" class="sr">Search words</label>
+      <input id="xq" type="search" placeholder="search…" autocomplete="off" spellcheck="false">
+      <div id="xfilters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <span class="xcount" id="xcount"></span>
+    </div>
+    <div class="xgrid" id="xgrid"></div>
+  </div>
+</section>
+
+<footer>
+  <p><strong style="color:var(--ink)">Team Winners:</strong> Joy, Radiah and Ellie · Deep Learning, Fall 2026 · Page by <a href="/">Radiah Khan</a></p>
+  <p>Data: Hungarian OpenSubtitles via <a href="https://opus.nlpl.eu/OpenSubtitles/corpus/version/OpenSubtitles" target="_blank" rel="noopener">OPUS</a> (Lison &amp; Tiedemann, 2016) · Hungarian Wiktionary via <a href="https://kaikki.org/dictionary/Hungarian/" target="_blank" rel="noopener">kaikki.org</a> · Turkic loanwords from CLDF (Róna-Tas &amp; Berta, 2011) · Lemmatization with <a href="https://huggingface.co/huspacy" target="_blank" rel="noopener">HuSpaCy</a>.</p>
+  <p>The in-browser model is the char n-gram logistic regression retrained on all 980 words; its weights are exported to JSON and run in JavaScript.</p>
+</footer>
+</main>
+
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+<script>
+(() => {
+"use strict";
+/* graceful fallbacks if a CDN library fails to load */
+const hljs = window.hljs || { highlightAll() {}, getLanguage() { return false; }, highlight: (c) => ({ value: c }) };
+const marked = window.marked || { parse: (t) => "<pre>" + String(t).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])) + "</pre>" };
+const DOMPurify = window.DOMPurify || { sanitize: (h) => h };
+const OWNER = "inthecrowsnest", REPO = "DeepLearningProject", BRANCH = "main";
+const RAW = (p) => `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${p.split('/').map(encodeURIComponent).join('/')}`;
+const GH = (p) => `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${p}`;
+const CLASSES = ["inherited", "german", "slavic", "turkic"];
+const NAMES = { inherited: "native", german: "German", slavic: "Slavic", turkic: "Turkic" };
+const CVAR = (c) => `var(--c-${c})`;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- tooltip ---------- */
+const tip = $("#tip");
+function bindTip(el, html) {
+  el.addEventListener("mousemove", (e) => { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(e.clientX + 14, innerWidth - 270) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+  el.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
+}
+
+/* ---------- data (from m1_updated_model.ipynb outputs) ---------- */
+const CLASS_COUNTS = { inherited: 375, german: 261, slavic: 170, turkic: 174 };
+const MEDIAN_COUNT = { inherited: 20, german: 3, slavic: 7, turkic: 8 };
+const RESULTS = [
+  { name: "Majority baseline", note: "always “native”", acc: [0.383, 0.000], f1: [0.138, 0.000], rec: [[1.000,0],[0,0],[0,0],[0,0]] },
+  { name: "Frequency only", note: "word frequency", acc: [0.435, 0.033], f1: [0.332, 0.038], rec: [[0.573,0.025],[0.690,0.070],[0.094,0.060],[0.087,0.073]] },
+  { name: "Char n-gram LR", note: "2–4 letter TF-IDF", acc: [0.637, 0.041], f1: [0.609, 0.041], rec: [[0.744,0.064],[0.598,0.032],[0.524,0.078],[0.574,0.032]], best: true },
+  { name: "Char-GRU", note: "bidirectional GRU", acc: [0.607, 0.013], f1: [0.576, 0.006], rec: [[0.715,0.050],[0.586,0.058],[0.535,0.097],[0.477,0.068]] },
+];
+const CM = {
+  ng:  [[0.74,0.04,0.07,0.14],[0.14,0.60,0.18,0.08],[0.18,0.17,0.52,0.12],[0.23,0.06,0.13,0.57]],
+  gru: [[0.71,0.04,0.09,0.15],[0.16,0.59,0.19,0.07],[0.17,0.21,0.54,0.08],[0.23,0.14,0.16,0.48]],
+};
+
+/* ---------- simple bars ---------- */
+function simpleBars(el, data, fmt, max) {
+  el.innerHTML = "";
+  for (const c of CLASSES) {
+    const v = data[c];
+    const row = document.createElement("div");
+    row.className = "bar";
+    row.style.setProperty("--c", CVAR(c));
+    row.innerHTML = `<span class="lab"><span class="chip" style="--c:${CVAR(c)}">${NAMES[c]}</span></span><div class="track"><div class="fill" style="width:${(v / max) * 100}%"></div></div><span class="val">${fmt(v)}</span>`;
+    el.appendChild(row);
+  }
+}
+const total = Object.values(CLASS_COUNTS).reduce((a, b) => a + b, 0);
+simpleBars($("#classBars"), CLASS_COUNTS, (v) => `${v} <span class="muted">${Math.round(v / total * 100)}%</span>`, 375);
+simpleBars($("#freqBars"), MEDIAN_COUNT, (v) => `${v}×`, 20);
+
+/* ---------- results chart ---------- */
+const XMAX = 0.8, pct = (v) => (v / XMAX) * 100;
+const rc = $("#rchart");
+for (const r of RESULTS) {
+  const row = document.createElement("div");
+  row.className = "rrow" + (r.best ? " best" : "");
+  const lo = Math.max(0, r.f1[0] - r.f1[1]), hi = r.f1[0] + r.f1[1];
+  const grid = [0.2, 0.4, 0.6].map((g) => `<span class="grid" style="left:${pct(g)}%"></span>`).join("");
+  row.innerHTML = `<div class="name">${r.name}<small>${r.note}</small></div>
+    <div class="rtrack">${grid}<div class="fill" style="width:${pct(r.f1[0])}%"></div>${r.f1[1] > 0 ? `<div class="wh" style="left:${pct(lo)}%;width:${pct(hi) - pct(lo)}%"></div>` : ""}</div>
+    <div class="num">${r.f1[0].toFixed(3)} <small>± ${r.f1[1].toFixed(3)}</small></div>`;
+  rc.appendChild(row);
+  bindTip(row, `<b>${r.name}</b><br>macro-F1 ${r.f1[0].toFixed(3)} ± ${r.f1[1].toFixed(3)}<br>accuracy ${r.acc[0].toFixed(3)} ± ${r.acc[1].toFixed(3)}`);
+}
+$("#rticks").innerHTML = [0, 0.2, 0.4, 0.6, 0.8].map((t) => `<span style="left:${pct(t)}%">${t.toFixed(1)}</span>`).join("");
+
+/* ---------- recall dot plot ---------- */
+const ng = RESULTS[2], gru = RESULTS[3], dots = $("#dots");
+CLASSES.forEach((c, i) => {
+  const a = ng.rec[i][0], b = gru.rec[i][0];
+  const row = document.createElement("div");
+  row.className = "drow";
+  row.innerHTML = `<span class="chip" style="--c:${CVAR(c)}">${NAMES[c]}</span>
+    <div class="dtrack"><div class="link" style="left:${Math.min(a, b) * 100}%;width:${Math.abs(a - b) * 100}%"></div>
+    <span class="dot ng" style="left:${a * 100}%"></span><span class="dot gru" style="left:${b * 100}%"></span></div>`;
+  dots.appendChild(row);
+  bindTip(row, `<b>${NAMES[c]}</b><br>n-gram LR ${a.toFixed(3)} ± ${ng.rec[i][1].toFixed(3)}<br>char-GRU ${b.toFixed(3)} ± ${gru.rec[i][1].toFixed(3)}`);
+});
+$("#dticks").innerHTML = [0, 0.25, 0.5, 0.75, 1].map((t) => `<span style="left:${t * 100}%">${t}</span>`).join("");
+
+/* ---------- confusion matrix ---------- */
+const RAMP = ["#1f2a38", "#184f95", "#1c5cab", "#256abf", "#2a78d6", "#3987e5", "#5598e7", "#6da7ec"];
+function cmColor(v) { return RAMP[Math.min(RAMP.length - 1, Math.floor(v * RAMP.length * 1.15))]; }
+function drawCM(key) {
+  const m = CM[key], t = $("#cm");
+  let h = `<caption>Each row sums to 1. Diagonal = correct.</caption><thead><tr><th></th>${CLASSES.map((c) => `<th>${NAMES[c]}</th>`).join("")}</tr></thead><tbody>`;
+  m.forEach((row, i) => {
+    h += `<tr><th class="rowh">${NAMES[CLASSES[i]]}</th>` + row.map((v, j) => `<td data-i="${i}" data-j="${j}" style="background:${cmColor(v)};color:${v > 0.3 ? "#fff" : "var(--ink-2)"};${i === j ? "font-weight:600" : ""}">${v.toFixed(2)}</td>`).join("") + "</tr>";
+  });
+  t.innerHTML = h + "</tbody>";
+  t.querySelectorAll("td").forEach((td) => {
+    const i = +td.dataset.i, j = +td.dataset.j;
+    bindTip(td, i === j ? `${Math.round(m[i][j] * 100)}% of ${NAMES[CLASSES[i]]} words labeled correctly` : `${Math.round(m[i][j] * 100)}% of ${NAMES[CLASSES[i]]} words mistaken for ${NAMES[CLASSES[j]]}`);
+  });
+}
+document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  drawCM(b.dataset.m);
+}));
+drawCM("ng");
+
+/* ---------- results table ---------- */
+$("#rtable tbody").innerHTML = RESULTS.map((r) => `<tr class="${r.best ? "best" : ""}"><td>${r.name}</td>` +
+  [r.acc, r.f1, ...r.rec].map((x) => `<td class="n">${x[0].toFixed(3)} <span class="muted">± ${x[1].toFixed(3)}</span></td>`).join("") + "</tr>").join("");
+
+hljs.highlightAll();
+
+/* ---------- in-browser model ---------- */
+function charWbNgrams(text, minN, maxN) {
+  const out = [];
+  for (const raw of text.toLowerCase().split(/\s+/).filter(Boolean)) {
+    const chars = Array.from(" " + raw + " ");
+    for (let n = minN; n <= maxN; n++) {
+      let off = 0;
+      out.push(chars.slice(off, off + n).join(""));
+      while (off + n < chars.length) { off++; out.push(chars.slice(off, off + n).join("")); }
+      if (off === 0) break;
+    }
+  }
+  return out;
+}
+function makePredictor(model) {
+  const index = new Map(model.ngrams.map((g, i) => [g, i]));
+  return (word) => {
+    const tf = new Map();
+    for (const g of charWbNgrams(word, 2, 4)) { const i = index.get(g); if (i !== undefined) tf.set(i, (tf.get(i) || 0) + 1); }
+    let norm = 0; const feats = [];
+    for (const [i, c] of tf) { const v = c * model.idf[i]; feats.push([i, v]); norm += v * v; }
+    norm = Math.sqrt(norm) || 1;
+    const z = model.intercept.slice(), contrib = [];
+    for (const [i, v] of feats) { const x = v / norm; for (let c = 0; c < 4; c++) z[c] += x * model.coef[i][c]; contrib.push({ g: model.ngrams[i], x, w: model.coef[i] }); }
+    const mx = Math.max(...z), e = z.map((v) => Math.exp(v - mx)), s = e.reduce((a, b) => a + b, 0);
+    return { probs: e.map((v) => v / s), contrib, known: feats.length };
+  };
+}
+
+let predict = null, WORDS = [], WORDMAP = new Map();
+const EXAMPLES = ["paprika", "kenyér", "ablak", "szoba", "kalap", "hal", "kocsi", "tükör", "zseb", "szív", "polgár", "búza"];
+const ex = $("#examples");
+EXAMPLES.forEach((w) => { const b = document.createElement("button"); b.type = "button"; b.textContent = w; b.onclick = () => { $("#word").value = w; run(); }; ex.appendChild(b); });
+
+function run() {
+  if (!predict) return;
+  const w = $("#word").value.trim().toLowerCase();
+  const probsEl = $("#probs"), verdict = $("#verdict"), ngEl = $("#ngrams"), known = $("#known");
+  if (!w) { verdict.textContent = "Type a word to see the model's guess."; probsEl.innerHTML = ""; ngEl.innerHTML = ""; known.innerHTML = ""; return; }
+  const r = predict(w);
+  const best = r.probs.indexOf(Math.max(...r.probs));
+  verdict.innerHTML = r.known === 0
+    ? `None of the letter sequences in <strong>${esc(w)}</strong> appear in the training words, so the model can only fall back on its priors.`
+    : `The model's guess for <strong>${esc(w)}</strong>: <span class="chip" style="--c:${CVAR(CLASSES[best])};font-size:14px">${NAMES[CLASSES[best]]}</span>`;
+  probsEl.innerHTML = CLASSES.map((c, i) => `<div class="prob"><span class="chip" style="--c:${CVAR(c)}">${NAMES[c]}</span><div class="track"><div class="fill" style="--c:${CVAR(c)};width:${(r.probs[i] * 100).toFixed(1)}%"></div></div><span class="pct">${(r.probs[i] * 100).toFixed(0)}%</span></div>`).join("");
+  const top = r.contrib.map((d) => ({ ...d, s: d.x * d.w[best] })).sort((a, b) => b.s - a.s).slice(0, 8).filter((d) => d.s > 0);
+  ngEl.innerHTML = top.length ? top.map((d) => `<span class="ng">${esc(d.g.replace(/ /g, "␣"))}<b>→ ${NAMES[CLASSES[best]]}</b></span>`).join("") : `<span class="muted" style="font-size:13px">No single sequence stands out.</span>`;
+  const k = WORDMAP.get(w);
+  known.innerHTML = k ? `<div class="known">📚 <strong>${esc(w)}</strong> is in the training data, labeled <span class="chip" style="--c:${CVAR(k[1])}">${NAMES[k[1]]}</span>. The model has seen it, so this guess isn't a fair test.</div>` : "";
+}
+$("#word").addEventListener("input", run);
+
+fetch("model.json").then((r) => r.json()).then((m) => { predict = makePredictor(m); run(); })
+  .catch(() => { $("#verdict").textContent = "The model couldn't load. Try refreshing the page."; });
+
+/* ---------- word explorer ---------- */
+let xFilter = new Set(CLASSES);
+const xf = $("#xfilters");
+CLASSES.forEach((c) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "fchip"; b.setAttribute("aria-pressed", "true");
+  b.innerHTML = `<i style="--c:${CVAR(c)}"></i>${NAMES[c]} <span class="muted">${CLASS_COUNTS[c]}</span>`;
+  b.onclick = () => { xFilter.has(c) ? xFilter.delete(c) : xFilter.add(c); b.setAttribute("aria-pressed", xFilter.has(c)); drawWords(); };
+  xf.appendChild(b);
+});
+function drawWords() {
+  const q = $("#xq").value.trim().toLowerCase();
+  const list = WORDS.filter(([w, c]) => xFilter.has(c) && (!q || w.includes(q)));
+  $("#xcount").textContent = `${list.length} words`;
+  const g = $("#xgrid");
+  g.innerHTML = list.map(([w, c, n]) => `<div class="xw" style="--c:${CVAR(c)}" data-w="${esc(w)}" title="${NAMES[c]} · ${n}× in subtitles" role="button" tabindex="0">${esc(w)}<span>${n}</span></div>`).join("");
+}
+$("#xgrid").addEventListener("click", (e) => { const el = e.target.closest(".xw"); if (!el) return; $("#word").value = el.dataset.w; run(); $("#try").scrollIntoView({ behavior: "smooth" }); });
+$("#xgrid").addEventListener("keydown", (e) => { if (e.key === "Enter") e.target.click(); });
+$("#xq").addEventListener("input", drawWords);
+fetch("words.json").then((r) => r.json()).then((w) => { WORDS = w; WORDMAP = new Map(w.map((x) => [x[0], x])); drawWords(); run(); });
+
+/* ---------- live code browser ---------- */
+const SNAPSHOT = [[".gitignore",113],["README.md",2734],["README_m1.md",5778],["build_table.py",5601],["cldf_turkic.csv",29345],["clean_labeled_subtitles.py",1279],["label_subtitles.py",2289],["labeled_subtitle_words.csv",20353],["labeled_words.csv",139412],["m1_updated_model.ipynb",187014],["preprocessing_updated.py",5179],["requirements.txt",45],["source_counts.csv",1426],["subtitles_to_jsonl.py",762],["tokens_dataset_updated.csv",81625],["words.csv",142136],["xml_to_csv.py",3685]];
+const GROUPS = [
+  ["Start here", (f) => /^(README.*\.md|m1_updated_model\.ipynb|requirements\.txt)$/.test(f)],
+  ["Pipeline", (f) => /\.py$/.test(f)],
+  ["Data", (f) => /\.csv$/.test(f)],
+  ["Other", () => true],
+];
+function kb(n) { return n > 1024 ? (n / 1024).toFixed(0) + " KB" : n + " B"; }
+function renderTree(files, live) {
+  const ul = $("#files"); ul.innerHTML = "";
+  const used = new Set();
+  for (const [label, test] of GROUPS) {
+    const items = files.filter((f) => !used.has(f.path) && test(f.path));
+    if (!items.length) continue;
+    ul.insertAdjacentHTML("beforeend", `<li class="grp">${label}</li>`);
+    items.sort((a, b) => a.path.localeCompare(b.path)).forEach((f) => {
+      used.add(f.path);
+      const li = document.createElement("li");
+      li.innerHTML = `<button type="button" data-p="${esc(f.path)}"><span>${esc(f.path)}</span><span class="sz">${kb(f.size)}</span></button>`;
+      li.firstChild.onclick = () => openFile(f.path, f.size);
+      ul.appendChild(li);
+    });
+  }
+  const b = $("#treeBadge"); b.textContent = live ? "● live" : "snapshot"; b.classList.toggle("off", !live);
+}
+function lines(html) { return html.split("\n").map((l) => `<span class="ln">${l || " "}</span>`).join(""); }
+function hl(code, lang) {
+  try { return lang && hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : esc(code); } catch { return esc(code); }
+}
+function parseCSV(text, maxRows) {
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ",") { row.push(cur); cur = ""; }
+    else if (ch === "\n") { row.push(cur.replace(/\r$/, "")); rows.push(row); row = []; cur = ""; if (rows.length > maxRows) break; }
+    else cur += ch;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+function renderNotebook(nb) {
+  const out = [];
+  for (const c of nb.cells || []) {
+    const src = Array.isArray(c.source) ? c.source.join("") : c.source || "";
+    if (c.cell_type === "markdown") { out.push(`<div class="nb-cell md">${DOMPurify.sanitize(marked.parse(src))}</div>`); continue; }
+    if (c.cell_type !== "code") continue;
+    let h = `<div class="nb-cell"><div class="nb-in">In [${c.execution_count ?? " "}]:</div><pre><code class="hljs">${hl(src, "python")}</code></pre>`;
+    for (const o of c.outputs || []) {
+      const d = o.data || {};
+      if (d["image/png"]) h += `<div class="nb-out"><img alt="Notebook output figure" src="data:image/png;base64,${String(d["image/png"]).replace(/\n/g, "")}"></div>`;
+      else {
+        const t = o.text || d["text/plain"];
+        if (t) { const s = Array.isArray(t) ? t.join("") : t; h += `<div class="nb-out">${esc(s.length > 4000 ? s.slice(0, 4000) + "\n…" : s)}</div>`; }
+      }
+    }
+    out.push(h + "</div>");
+  }
+  return out.join("");
+}
+let openToken = 0;
+async function openFile(path, size) {
+  const token = ++openToken;
+  document.querySelectorAll(".ide-files button").forEach((b) => b.setAttribute("aria-current", b.dataset.p === path));
+  $("#fname").textContent = path; $("#fgh").href = GH(path);
+  const body = $("#fbody"); body.innerHTML = `<div class="loading">Fetching ${esc(path)} from GitHub…</div>`;
+  try {
+    const res = await fetch(RAW(path), { cache: "no-cache" });
+    if (!res.ok) throw new Error(res.status);
+    let text = await res.text();
+    if (token !== openToken) return;
+    text = text.replace(/^﻿/, "");
+    if (path.endsWith(".ipynb")) body.innerHTML = renderNotebook(JSON.parse(text));
+    else if (path.endsWith(".md")) body.innerHTML = `<div class="md-file">${DOMPurify.sanitize(marked.parse(text))}</div>`;
+    else if (path.endsWith(".csv")) {
+      const rows = parseCSV(text, 100), head = rows.shift() || [];
+      body.innerHTML = `<table class="csvt"><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.slice(0, 100).map((r) => `<tr>${r.map((v) => `<td>${esc(v.length > 80 ? v.slice(0, 80) + "…" : v)}</td>`).join("")}</tr>`).join("")}</tbody></table><div class="loading">Showing the first ${Math.min(100, rows.length)} rows · <a href="${GH(path)}" target="_blank" rel="noopener">full file on GitHub ↗</a></div>`;
+    } else {
+      const lang = path.endsWith(".py") ? "python" : path.endsWith(".txt") || path === ".gitignore" ? "plaintext" : null;
+      body.innerHTML = `<pre><code class="hljs">${lines(hl(text, lang))}</code></pre>`;
+    }
+    body.scrollTop = 0;
+  } catch (e) {
+    if (token !== openToken) return;
+    body.innerHTML = `<div class="loading">Couldn't load this file right now. <a href="${GH(path)}" target="_blank" rel="noopener">View it on GitHub ↗</a></div>`;
+  }
+}
+renderTree(SNAPSHOT.map(([path, size]) => ({ path, size })), false);
+openFile("README.md");
+fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents?ref=${BRANCH}`)
+  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+  .then((items) => { const files = items.filter((x) => x.type === "file").map((x) => ({ path: x.path, size: x.size })); renderTree(files, true); document.querySelectorAll(".ide-files button").forEach((b) => b.setAttribute("aria-current", b.dataset.p === $("#fname").textContent)); })
+  .catch(() => {});
+
+/* ---------- live project log ---------- */
+fetch(`https://api.github.com/repos/${OWNER}/${REPO}/commits?sha=${BRANCH}&per_page=15`)
+  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+  .then((cs) => {
+    $("#commits").innerHTML = cs.map((c) => {
+      const d = new Date(c.commit.author.date);
+      const msg = c.commit.message.split("\n")[0];
+      const who = (c.author && c.author.login) || c.commit.author.name;
+      return `<li><span class="d">${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span><span class="m" title="${esc(msg)}">${esc(msg)}<a class="sha" href="${c.html_url}" target="_blank" rel="noopener">${c.sha.slice(0, 7)}</a></span><span class="a">${esc(who)}</span></li>`;
+    }).join("");
+    const b = $("#logBadge"); b.textContent = "● live"; b.classList.remove("off");
+  })
+  .catch(() => {
+    $("#commits").innerHTML = `<li><span class="d"></span><span class="m">The live log couldn't load (GitHub limits anonymous requests). <a href="https://github.com/${OWNER}/${REPO}/commits/${BRANCH}" target="_blank" rel="noopener">See all commits on GitHub ↗</a></span><span></span></li>`;
+    const b = $("#logBadge"); b.textContent = "offline";
+  });
+})();
+</script>
+</body>
+</html>
