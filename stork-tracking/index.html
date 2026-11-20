@@ -4,11 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Where Do White Storks Stop on the Way South? · Radiah Khan</title>
-<meta name="description" content="Sequential GPS data from 60 white storks: ordered movement sequences, SQL window functions, stopover detection, an interactive pattern explorer and an LLM text-to-SQL interface.">
+<meta name="description" content="Sequential GPS data from 60 white storks: ordered movement sequences, SQL window functions, stopover detection and an LLM text-to-SQL interface.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root {
   color-scheme: dark;
@@ -77,24 +76,6 @@ h3 { font-size: 16px; margin: 0 0 6px; }
 .panel-title { font-weight: 600; margin: 0 0 4px; }
 .panel-sub { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
 
-/* demo */
-.demo { display: grid; grid-template-columns: 360px 1fr; gap: 16px; }
-.demo > * { min-width: 0; }
-@media (max-width: 900px) { .demo { grid-template-columns: 1fr; } }
-.ctrl { margin-bottom: 16px; }
-.ctrl label { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--ink-2); margin-bottom: 4px; }
-.ctrl label .val { font-family: var(--mono); color: var(--ink); }
-.ctrl input[type=range] { width: 100%; accent-color: var(--accent); }
-.diagram { width: 100%; height: auto; display: block; margin: 4px 0 6px; }
-.diagram .node { cursor: pointer; }
-.diagram .node rect { stroke-width: 1.5; transition: opacity .15s; }
-.diagram .node:hover rect, .diagram .node.on rect { stroke-width: 3; }
-.diagram text { font-family: var(--mono); fill: var(--ink); }
-.explain { background: var(--paper-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-size: 14px; color: var(--ink-2); }
-#map { height: 430px; border-radius: 10px; border: 1px solid var(--line); background: #111; }
-.leaflet-container { font-family: var(--sans); }
-.legend { display: flex; flex-wrap: wrap; gap: 14px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin: 10px 0 0; }
-.legend span::before { content: ""; display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--c); }
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
 th { color: var(--muted); font-weight: 500; font-family: var(--mono); font-size: 12px; }
@@ -121,7 +102,7 @@ footer { border-top: 1px solid var(--line); margin-top: 60px; padding-top: 18px;
 <div class="topbar"><div class="topbar-inner">
   <div class="crumb"><a href="../">radiah khan</a> / stork-tracking</div>
   <nav class="topnav">
-    <a href="#try">Demo</a><a href="#data">Data</a><a href="#pipeline">Pipeline</a><a href="#findings">Findings</a><a href="#ask">Ask the data</a><a href="#code">Code</a>
+    <a href="#data">Data</a><a href="#pipeline">Pipeline</a><a href="#findings">Findings</a><a href="#ask">Ask the data</a><a href="#code">Code</a>
   </nav>
 </div></div>
 
@@ -132,8 +113,7 @@ footer { border-top: 1px solid var(--line); margin-top: 60px; padding-top: 18px;
   <h1>Where do white storks <span class="q">stop</span> on the way south?</h1>
   <p class="lede">A small data pipeline that turns 7.2 million raw GPS fixes from 60 white storks into ordered movement sequences, analyzes them with SQL window functions, finds multi-day stopovers, and lets anyone ask questions in plain English, with an LLM writing the SQL.</p>
   <div class="btns">
-    <a class="btn primary" href="#try">Try the pattern explorer ↓</a>
-    <a class="btn" href="https://github.com/radiah23/Stork-Tracking---Sequential-Data-Analysis">Browse the code ↗</a>
+    <a class="btn primary" href="https://github.com/radiah23/Stork-Tracking---Sequential-Data-Analysis">Browse the code ↗</a>
   </div>
   <div class="kpis">
     <div class="kpi"><div class="v">7.2M</div><div class="l">raw GPS fixes</div></div>
@@ -141,59 +121,6 @@ footer { border-top: 1px solid var(--line); margin-top: 60px; padding-top: 18px;
     <div class="kpi"><div class="v">421,898</div><div class="l">points after one fix per 5 minutes</div></div>
     <div class="kpi"><div class="v">7,956 km</div><div class="l">longest trip (Ekky, 62 days)</div></div>
   </div>
-</section>
-
-<section id="try">
-  <p class="eyebrow">Demo</p>
-  <h2>Describe a pattern, see where it happens</h2>
-  <p class="sub">Domain experts can often recognize a situation, like a stopover, without writing a query for it. This demo shows one pattern as a diagram, as a query, and as a plain sentence, all built from the same settings. Click a box in the diagram or a row in the table to see the matching points on the map.</p>
-
-  <div class="demo">
-    <div class="panel">
-      <p class="panel-title">Pattern: fly → stop → fly</p>
-      <p class="panel-sub">Move the sliders to change the pattern.</p>
-      <div class="ctrl">
-        <label for="r">Stop radius <span class="val" id="rv"></span></label>
-        <input type="range" id="r" min="1" max="20" step="1" value="5">
-      </div>
-      <div class="ctrl">
-        <label for="n">Minimum stop length <span class="val" id="nv"></span></label>
-        <input type="range" id="n" min="10" max="120" step="5" value="40">
-      </div>
-      <div class="ctrl">
-        <label for="f">Flight before and after <span class="val" id="fv"></span></label>
-        <input type="range" id="f" min="10" max="150" step="10" value="50">
-      </div>
-      <svg class="diagram" id="diagram" viewBox="0 0 342 120" role="img" aria-label="Pattern diagram"></svg>
-      <div class="explain" id="explain"></div>
-    </div>
-
-    <div class="panel">
-      <div id="map" aria-label="Map of stork tracks"></div>
-      <div class="legend">
-        <span style="--c: var(--c-track)">track</span>
-        <span style="--c: var(--c-fly)">flight before / after</span>
-        <span style="--c: var(--c-stop)">stop</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid2" style="margin-top:16px">
-    <div class="panel">
-      <p class="panel-title">Matches <span class="muted" id="count"></span></p>
-      <p class="panel-sub">One row per stopover that fits the pattern.</p>
-      <table>
-        <thead><tr><th>Stork</th><th>Stop near</th><th>Points</th><th>Flight in / out</th></tr></thead>
-        <tbody id="rows"></tbody>
-      </table>
-    </div>
-    <div class="panel">
-      <p class="panel-title">The same pattern as a query</p>
-      <p class="panel-sub">A sketch in SQL's <code>MATCH_RECOGNIZE</code> style. It is generated from the sliders, not run on this page.</p>
-      <pre><code id="sql"></code></pre>
-    </div>
-  </div>
-  <p class="muted" style="font-size:13px;margin-top:12px">About this demo: it runs in your browser on 5 storks from the project map (Ekky, Cookie, Schwitza, Kristall, Frank Elstner). The map stores a thinned sample of each track without timestamps, so stop length is counted in points, not days. The full analysis in the repository uses all 421,898 time-stamped points. The diagram and sentence are built directly from the settings, so they always describe exactly what the query does. In a full system, an LLM could write the sentence, and this diagram would be the check on it.</p>
 </section>
 
 <section id="data">
@@ -299,176 +226,5 @@ footer { border-top: 1px solid var(--line); margin-top: 60px; padding-top: 18px;
 <footer>Radiah Khan · Smith College · Data: Movebank, Flack, Fiedler, Wikelski (2014). · <a href="../">Back to portfolio</a></footer>
 </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-(function () {
-  const FLY_WINDOW = 24; // points before and after a stop that are checked for flight
-  const $ = (id) => document.getElementById(id);
-  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const COL = { fly: css('--c-fly'), stop: css('--c-stop'), track: css('--c-track') };
-
-  function hav(a, b) {
-    const R = 6371, rad = Math.PI / 180;
-    const dLa = (b[0] - a[0]) * rad, dLo = (b[1] - a[1]) * rad;
-    const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLo / 2) ** 2;
-    return 2 * R * Math.asin(Math.sqrt(h));
-  }
-  function travel(p, a, b) {
-    a = Math.max(a, 0); b = Math.min(b, p.length - 1);
-    let s = 0;
-    for (let k = a; k < b; k++) s += hav(p[k], p[k + 1]);
-    return s;
-  }
-  // A stop is a run of at least n points that all stay within r km of the run's first point.
-  function findStops(p, r, n) {
-    const out = [];
-    let i = 0;
-    while (i < p.length) {
-      let j = i;
-      while (j + 1 < p.length && hav(p[i], p[j + 1]) <= r) j++;
-      if (j - i + 1 >= n) { out.push([i, j]); i = j + 1; } else { i++; }
-    }
-    return out;
-  }
-  function placeName(lat, lon) {
-    if (lat < 25) return 'the Sahel';
-    if (lat < 36.0) return 'Morocco';
-    if (lat < 36.6 && lon < -4.5) return 'the Strait of Gibraltar';
-    if (lat < 43.5 && lon < 3.3) return 'Spain';
-    if (lat < 46.5) return 'southern France';
-    return 'southern Germany';
-  }
-
-  let tracks = [], matches = [], map, base = [], hi = [], selected = null, activeNode = null;
-
-  function clearHi() { hi.forEach((l) => map.removeLayer(l)); hi = []; }
-  function seg(p, a, b, color, w) {
-    a = Math.max(a, 0); b = Math.min(b, p.length - 1);
-    const l = L.polyline(p.slice(a, b + 1), { color, weight: w, opacity: 0.95 }).addTo(map);
-    hi.push(l); return l;
-  }
-  function showMatches(list, part) {
-    clearHi();
-    const bounds = [];
-    list.forEach((m) => {
-      const p = m.track.points;
-      if (!part || part === 'fly1') { const l = seg(p, m.i - FLY_WINDOW, m.i, COL.fly, 4); bounds.push(l.getBounds()); }
-      if (!part || part === 'fly2') { const l = seg(p, m.j, m.j + FLY_WINDOW, COL.fly, 4); bounds.push(l.getBounds()); }
-      if (!part || part === 'stop') {
-        const l = seg(p, m.i, m.j, COL.stop, 6); bounds.push(l.getBounds());
-        const c = L.circleMarker(p[m.i], { radius: 6, color: COL.stop, fillColor: COL.stop, fillOpacity: 0.9 }).addTo(map)
-          .bindTooltip(`${m.track.name}: stop near ${m.place}`);
-        hi.push(c);
-      }
-    });
-    if (bounds.length) {
-      const b = bounds.reduce((acc, x) => acc.extend(x), L.latLngBounds(bounds[0].getSouthWest(), bounds[0].getNorthEast()));
-      map.fitBounds(b, { padding: [30, 30], maxZoom: list.length === 1 ? 9 : 6 });
-    }
-  }
-
-  function drawDiagram(r, n, f) {
-    const svg = $('diagram');
-    const nodes = [
-      { id: 'fly1', x: 2, label: 'FLY', sub: `≥ ${f} km`, color: COL.fly },
-      { id: 'stop', x: 116, label: 'STOP', sub: `≤ ${r} km, ≥ ${n} pts`, color: COL.stop },
-      { id: 'fly2', x: 240, label: 'FLY', sub: `≥ ${f} km`, color: COL.fly },
-    ];
-    let s = '<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8f8e88"/></marker></defs>';
-    s += '<line x1="103" y1="45" x2="114" y2="45" stroke="#8f8e88" stroke-width="1.5" marker-end="url(#arr)"/>';
-    s += '<line x1="217" y1="45" x2="238" y2="45" stroke="#8f8e88" stroke-width="1.5" marker-end="url(#arr)"/>';
-    nodes.forEach((nd) => {
-      s += `<g class="node${activeNode === nd.id ? ' on' : ''}" data-id="${nd.id}" tabindex="0" role="button" aria-label="${nd.label} ${nd.sub}">
-        <rect x="${nd.x}" y="18" width="100" height="54" rx="8" fill="#1e1e1e" stroke="${nd.color}"/>
-        <text x="${nd.x + 50}" y="42" text-anchor="middle" font-size="13" font-weight="600" style="fill:${nd.color}">${nd.label}</text>
-        <text x="${nd.x + 50}" y="60" text-anchor="middle" font-size="8.5">${nd.sub}</text></g>`;
-    });
-    s += `<text x="171" y="100" text-anchor="middle" font-size="9.5" style="fill:#8f8e88">flight measured over ${FLY_WINDOW} points before and after</text>`;
-    svg.innerHTML = s;
-    svg.querySelectorAll('.node').forEach((g) => {
-      const go = () => {
-        activeNode = activeNode === g.dataset.id ? null : g.dataset.id;
-        selected = null; markRows();
-        drawDiagram(r, n, f);
-        showMatches(matches, activeNode);
-      };
-      g.addEventListener('click', go);
-      g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-    });
-  }
-
-  function writeSQL(r, n, f) {
-    $('sql').innerHTML =
-`<span class="kw">SELECT</span> *
-<span class="kw">FROM</span> tracking
-<span class="fn">MATCH_RECOGNIZE</span> (
-  <span class="kw">PARTITION BY</span> animal_id
-  <span class="kw">ORDER BY</span> timestamp
-  <span class="kw">MEASURES</span> <span class="fn">FIRST</span>(STOP.latitude)  <span class="kw">AS</span> stop_lat,
-           <span class="fn">FIRST</span>(STOP.longitude) <span class="kw">AS</span> stop_lon,
-           <span class="fn">COUNT</span>(STOP.*)         <span class="kw">AS</span> stop_points
-  <span class="kw">ONE ROW PER MATCH</span>
-  <span class="kw">PATTERN</span> (FLY_IN{<span class="nm">${FLY_WINDOW}</span>} STOP{<span class="nm">${n}</span>,} FLY_OUT{<span class="nm">${FLY_WINDOW}</span>})
-  <span class="kw">DEFINE</span>
-    STOP <span class="kw">AS</span> <span class="fn">dist_km</span>(<span class="fn">FIRST</span>(STOP.latitude), <span class="fn">FIRST</span>(STOP.longitude),
-                     latitude, longitude) &lt;= <span class="nm">${r}</span>
-)
-<span class="cm">-- plus a filter: total step_km of FLY_IN and of FLY_OUT &gt;= ${f}</span>`;
-  }
-
-  function explain(r, n, f, count, storks) {
-    const who = storks.length ? `, found for ${storks.join(', ')}` : '';
-    $('explain').innerHTML = `A stork flies at least <b>${f} km</b>, then stays within <b>${r} km</b> of one spot for at least <b>${n} points</b>, then flies at least <b>${f} km</b> again. <span class="muted">${count} match${count === 1 ? '' : 'es'}${who}.</span>`;
-  }
-
-  function markRows() {
-    document.querySelectorAll('#rows tr').forEach((tr, k) => tr.classList.toggle('sel', k === selected));
-  }
-
-  function run() {
-    const r = +$('r').value, n = +$('n').value, f = +$('f').value;
-    $('rv').textContent = `${r} km`; $('nv').textContent = `${n} points`; $('fv').textContent = `${f} km`;
-    matches = [];
-    tracks.forEach((t) => {
-      const p = t.points;
-      findStops(p, r, n).forEach(([i, j]) => {
-        const fin = travel(p, i - FLY_WINDOW, i), fout = travel(p, j, j + FLY_WINDOW);
-        if (fin >= f && fout >= f) matches.push({ track: t, i, j, fin, fout, place: placeName(p[i][0], p[i][1]) });
-      });
-    });
-    selected = null; activeNode = null;
-    const storks = [...new Set(matches.map((m) => m.track.name))];
-    $('count').textContent = `(${matches.length})`;
-    $('rows').innerHTML = matches.length ? matches.map((m) =>
-      `<tr tabindex="0"><td>${m.track.name}</td><td>${m.place}</td><td class="num">${m.j - m.i + 1}</td><td class="num">${Math.round(m.fin)} / ${Math.round(m.fout)} km</td></tr>`).join('')
-      : '<tr style="cursor:default"><td colspan="4" class="muted">No stopovers fit this pattern. Try a larger radius or a shorter stop.</td></tr>';
-    document.querySelectorAll('#rows tr').forEach((tr, k) => {
-      if (!matches.length) return;
-      const go = () => { selected = k; activeNode = null; markRows(); drawDiagram(r, n, f); showMatches([matches[k]]); };
-      tr.addEventListener('click', go);
-      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
-    });
-    drawDiagram(r, n, f);
-    writeSQL(r, n, f);
-    explain(r, n, f, matches.length, storks);
-    showMatches(matches);
-  }
-
-  function init(data) {
-    tracks = data;
-    map = L.map('map', { scrollWheelZoom: false }).setView([33, 3], 4);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 18,
-    }).addTo(map);
-    tracks.forEach((t) => base.push(L.polyline(t.points, { color: COL.track, weight: 2, opacity: 0.7 }).addTo(map).bindTooltip(t.name, { sticky: true })));
-    ['r', 'n', 'f'].forEach((id) => $(id).addEventListener('input', run));
-    run();
-  }
-
-  fetch('tracks.json').then((r) => r.json()).then(init).catch(() => {
-    $('explain').textContent = 'Could not load the track data.';
-  });
-})();
-</script>
 </body>
 </html>
