@@ -39,10 +39,10 @@
   <section class="hero wrap">
     <img class="hero__avatar" src="headshot.jpeg" alt="Radiah Khan">
     <div class="hero__body">
-      <p class="eyebrow">Northampton, MA &middot; Statistical &amp; Data Sciences, Smith College</p>
+      <p class="eyebrow">Statistical &amp; Data Sciences, Smith College &middot; Exchange: Budapest (Fall 2026), Singapore (Spring 2027)</p>
       <h1 class="hero__name">Radiah Khan</h1>
       <p class="hero__bio">
-        Hi! I am an aspiring data scientist and mixed-methods researcher. Smith College '28, Statistical &amp; Data Sciences. I am interested in social analytics, clinical data, consumer behavior, AI/ML, and computational linguistics.
+        Hi! I am an aspiring data scientist and mixed-methods researcher. Smith College '28, Statistical &amp; Data Sciences. I am interested in social analytics, clinical data, consumer behavior, AI/ML, computational linguistics, and network models of economic systems.
       </p>
       <div class="hero__tools" aria-label="Languages and tools">
         <div class="tool-group">
@@ -54,6 +54,7 @@
             <li class="chip">Java</li>
             <li class="chip">JavaScript</li>
             <li class="chip">MATLAB</li>
+            <li class="chip">Stata</li>
           </ul>
         </div>
         <div class="tool-group">
@@ -66,6 +67,8 @@
             <li class="chip">NLTK</li>
             <li class="chip">spaCy</li>
             <li class="chip">NumPy</li>
+            <li class="chip">Hugging Face</li>
+            <li class="chip">statsmodels</li>
           </ul>
         </div>
         <div class="tool-group">
@@ -82,6 +85,8 @@
             <li class="chip">Quarto</li>
             <li class="chip">Databricks</li>
             <li class="chip">Spark SQL</li>
+            <li class="chip">FastAPI</li>
+            <li class="chip">Claude API</li>
           </ul>
         </div>
       </div>
@@ -95,6 +100,7 @@
     <button class="tabnav__btn" data-tab="projects">Projects</button>
     <button class="tabnav__btn" data-tab="honors">Honors</button>
     <button class="tabnav__btn" data-tab="involvement">Campus Involvements</button>
+    <button class="tabnav__btn" data-tab="education">Education</button>
   </nav>
 
   <!-- ===== Work Experience (timeline) ===== -->
@@ -110,23 +116,25 @@
         <div class="tl-item__date">Jun 2026 — Aug 2026</div>
         <div class="tl-item__card">
           <h3>PCCTC Data Science Intern</h3>
-          <p class="tl-item__org">Memorial Sloan Kettering Cancer Center</p>
+          <p class="tl-item__org">Memorial Sloan Kettering Cancer Center &middot; Prostate Cancer Clinical Trials Consortium &middot; Remote</p>
           <ul>
-            <li>Engineering 3 reproducible data pipelines (R Markdown) generating visit reports and monthly monitoring reports, and 10 TLFs (Tables, Listings, and Figures; gtsummary, gtreg) for a Phase 2 prostate cancer trial; building interactive and static visualizations with ggplot2 and ggiraph, all under CDISC clinical standards.</li>
-            <li>Contributing to 2 dataset derivations for a large-scale registry study in tidyverse; contributing to an internal R package with 1 internal function and full test coverage (testthat, withr, cli); enforcing reproducibility through renv.</li>
-            <li>Working cross-functionally with Data Management, Clinical Operations, and Biostatistics to align reporting deliverables across the trial lifecycle. All work managed under Git version control.</li>
+            <li>Cut prostate-specific antigen (PSA) progression calculations from 44 minutes to 5 seconds (99%) with 3 PSA endpoint R functions for an internal package, backed by 200 unit tests (testthat, withr, cli); the functions were adopted by a trial team for 30+ ongoing trials.</li>
+            <li>Engineered 5 reproducible ETL pipelines (R Markdown, tidyverse) for Phase 2 (n=12) and Phase 4 (n=5,000+) prostate cancer trials, generating visit reports, monthly monitoring reports, and 10 Tables, Listings, and Figures (gtsummary, gtreg) under CDISC standards.</li>
+            <li>Built 4 dashboards (Power BI) and 3 clinical visualizations (ggplot2, ggiraph); contributed 2 dataset derivations for a large-scale registry study; enforced reproducibility with renv and Git.</li>
+            <li>Worked cross-functionally with Data Management, Clinical Operations, and Biostatistics; used AI coding tools (Claude Code, GitHub Copilot) to speed up package development, checking every output with tests.</li>
           </ul>
         </div>
       </li>
 
       <li class="tl-item" data-tag="industry">
         <div class="tl-item__marker"></div>
-        <div class="tl-item__date">May 2025 — Aug 2025</div>
+        <div class="tl-item__date">May 2025 — Jul 2025</div>
         <div class="tl-item__card">
           <h3>Data Management Intern</h3>
-          <p class="tl-item__org">Solidago Foundation</p>
+          <p class="tl-item__org">Solidago Foundation &middot; Northampton, MA</p>
           <ul>
-            <li>Managed and analyzed 10 years of grant data (2008–2018) using Salesforce, Submittable, and MS Office Suite; built 3 relational databases and created a central system of 10 year-specific datasheets to standardize cover sheet analysis.</li>
+            <li>Led a 3-person team (SCRUM Master) that turned 1,000+ grant records into 3 relational databases; a reusable template and cross-check system cut delivery of the first batch from 3 months to 1 (67% faster) and removed rework for later batches.</li>
+            <li>Managed and analyzed 10 years of grant data (2008–2018) using Salesforce, Submittable, and MS Office Suite; created a central system of 10 year-specific datasheets to standardize cover sheet analysis.</li>
             <li>Qualitatively coded 200+ grant reports; built a tracking system for missing grants and identified discrepancies across three data batches.</li>
             <li>Authored a reusable analysis guide for future interns; communicated findings to leadership and external contractors in weekly meetings and a final stakeholder presentation.</li>
           </ul>
@@ -155,7 +163,7 @@
           <h3>Summer Intern</h3>
           <p class="tl-item__org">District Export Council Oregon &middot; U.S. Commercial Service</p>
           <ul>
-            <li>Co-coordinated two exporter-education events (Tariff Strategy for Producers, Journey in Exporting) with the U.S. Commercial Service, managing sponsor outreach, panelist logistics, Eventbrite ticketing, and flyer fact-checking.</li>
+            <li>Co-coordinated two exporter-education events (Tariff Strategy for Producers, Journey in Exporting) with the U.S. Commercial Service and 5 sponsor companies, reaching 400+ contacts and drawing 300+ attendees; managed panelist logistics, Eventbrite ticketing, and flyer fact-checking.</li>
             <li>Restructured the organization's workflow from fragmented Microsoft/Google tools to a centralized Google Workspace and Slack system, improving collaboration across a 21-member board.</li>
             <li>Served as primary point of contact for Oregon distributors; cleaned and standardized the contact list to increase communication efficiency.</li>
             <li>Drafted LinkedIn content, interview questions for board members and sponsors, and managed website updates.</li>
@@ -176,26 +184,39 @@
 
       <li class="tl-item" data-tag="research">
         <div class="tl-item__marker"></div>
-        <div class="tl-item__date">Jan 2026 — May 2026</div>
+        <div class="tl-item__date">Spring 2027 (Incoming)</div>
         <div class="tl-item__card">
-          <h3>Research Assistant, Tinker Lab</h3>
-          <p class="tl-item__org">Computer Science Dept., Smith College &middot; Advisor: Dr. Katherine Kinnaird</p>
+          <h3>Research Student, SMOL Project</h3>
+          <p class="tl-item__org">National University of Singapore &middot; Prof. Kokil Jaidka</p>
           <ul>
-            <li>Built a two-way automated survey system in Python, integrating Twilio's Messaging API and Google APIs with FastAPI middleware for real-time response ingestion, enabling rapid hypothesis testing on user intent at scale; applied spaCy named-entity recognition to structure qualitative responses for downstream analysis.</li>
-            <li>Built an NLP-based food recommendation pipeline using InstaFoodRoBERTa-NER for food entity recognition and ingredient classification, translating population-health constraints into personalized recommendations for a food-insecure patient population in Northampton.</li>
+            <li>Will research conversation repair and interpersonal behavior in everyday texts during an exchange semester at NUS.</li>
           </ul>
         </div>
       </li>
 
       <li class="tl-item" data-tag="research">
         <div class="tl-item__marker"></div>
-        <div class="tl-item__date">Sep 2025 — May 2026</div>
+        <div class="tl-item__date">Sep 2025 — Present</div>
         <div class="tl-item__card">
           <h3>Technical Researcher, Data Infrastructure Group Lab</h3>
-          <p class="tl-item__org">Statistical and Data Sciences Dept., Smith College &middot; Advisor: Dr. Nikko Stevens</p>
+          <p class="tl-item__org">Statistical and Data Sciences Dept., Smith College &middot; Advisor: Prof. Nikko Stevens</p>
           <ul>
-            <li>Built an NLP pipeline in Python (PyTorch, NLTK, Gensim) combining sentiment analysis, k-means and DEC–VAE clustering, and LDA topic modeling to segment AI-companion usage behavior across digital communities into actionable behavioral clusters; stress-tested model validity through silhouette scoring, HDBSCAN, and cross-institutional GitHub collaboration.</li>
-            <li>Built an interactive storymap from geospatial data-center infrastructure data in partnership with the Spatial Analysis Lab, using Python with ArcGIS, GeoPandas, and GDAL — cleaning and standardizing raw geospatial datasets to visualize infrastructure distribution patterns.</li>
+            <li>Studying how people use AI as a companion in a joint project with Brown University and Penn State University; built an NLP pipeline in Python (PyTorch, NLTK, PRAW, Gensim) on 1,000 Reddit posts, combining sentiment analysis, k-means and DEC–VAE deep clustering, and LDA topic modeling to segment usage into 3+ behavioral archetypes.</li>
+            <li>Validated clusters with silhouette scores and HDBSCAN and compared PCA, t-SNE, and UMAP; found that users share detailed prompts and workarounds to give AI companions memory, alongside high trust in AI.</li>
+            <li>Built an interactive storymap of U.S. data-center infrastructure with the Spatial Analysis Lab, cleaning and joining 3 raw data sources (JSON, GeoJSON, CSV) with ArcGIS, GeoPandas, and GDAL.</li>
+          </ul>
+        </div>
+      </li>
+
+      <li class="tl-item" data-tag="research">
+        <div class="tl-item__marker"></div>
+        <div class="tl-item__date">Jan 2026 — May 2026</div>
+        <div class="tl-item__card">
+          <h3>Research Assistant, Tinker Lab</h3>
+          <p class="tl-item__org">Computer Science Dept., Smith College &middot; Advisor: Prof. Katherine Kinnaird</p>
+          <ul>
+            <li>Built a two-way automated SMS survey system in Python on 2 APIs (Twilio Messaging and Google) with FastAPI middleware for real-time response ingestion, reaching 50+ users; applied spaCy named-entity recognition to structure qualitative responses for analysis.</li>
+            <li>Built an NLP recipe recommendation pipeline using InstaFoodRoBERTa-NER (Hugging Face) for food entity recognition and ingredient classification, turning users' dietary needs and available kitchen tools into personalized recipe suggestions for the Northampton Survival Center.</li>
           </ul>
         </div>
       </li>
@@ -223,7 +244,8 @@
           <h3>Independent Researcher, Digital Public Infrastructure Lab</h3>
           <p class="tl-item__org">University of Massachusetts Amherst &middot; Advisor: Prof. Ethan Zuckerman</p>
           <ul>
-            <li>Analyzed 200+ TikTok samples from Bangladesh and the U.S. using Python (pandas, scikit-learn), applying thematic segmentation and engagement metrics to identify cross-regional differences in digital consumer behavior.</li>
+            <li>Analyzed 200+ TikTok videos from South Asian and North American creators using Python (pandas, scikit-learn), running an A/B comparison of likes, comments, shares, and views.</li>
+            <li>Found 4 family- and community-based themes in South Asian content versus trend-driven U.S. content (community detection).</li>
             <li>Collaborated with PhD students on literature reviews of South Asian media ecosystems and cross-country video analysis methodologies, contributing to the lab's broader research on digital public infrastructure.</li>
           </ul>
         </div>
@@ -241,12 +263,37 @@
     <div class="filterbar" role="tablist" aria-label="Project filters">
       <button class="filterbar__btn is-active" data-filter="all">All</button>
       <button class="filterbar__btn" data-filter="social">Social &amp; Text Analytics</button>
+      <button class="filterbar__btn" data-filter="econ">Economics &amp; Networks</button>
       <button class="filterbar__btn" data-filter="policy">Policy &amp; Civic Data</button>
       <button class="filterbar__btn" data-filter="dashboards">Dashboards</button>
       <button class="filterbar__btn" data-filter="packages">Packages</button>
     </div>
 
     <div class="projects-grid">
+
+      <!-- ── Economics & Networks ── -->
+
+      <article class="project-card" data-cat="econ">
+        <span class="project-card__theme">Economics &amp; Networks</span>
+        <h3>Modeling the Fast Fashion Supply Chain (Team Project, Ongoing)</h3>
+        <p>Models global clothing trade as a network of 8 producing countries and 5 buying markets, linked by a supply-and-demand market calibrated to $299.8bn of 2024 exports. Five simulations test hub attacks vs. random failure, the Rana Plaza collapse, brand ethics thresholds, wage-driven relocation, and pollution havens. A 16% capacity shock (based on 529 of 3,320 Bangladeshi factories disrupted in November 2026) raises world prices 8.4% when it hits China, versus 1.1% for Bangladesh.</p>
+        <div class="project-card__stack">
+          <span class="stack-label">Stack</span>
+          <ul class="chips chips--sm"><li class="chip">Python</li><li class="chip">Jupyter</li><li class="chip">Network Science</li><li class="chip">Equilibrium Modeling</li><li class="chip">BACI Trade Data</li></ul>
+        </div>
+        <a class="project-card__link" href="https://github.com/radiah23/Modeling-Fast-Fashion-Supply-Chain" target="_blank" rel="noopener">View on GitHub →</a>
+      </article>
+
+      <article class="project-card" data-cat="dashboards">
+        <span class="project-card__theme">Dashboards &middot; Hackathon Winner</span>
+        <h3>Energy Revenue Dashboard (Team Project)</h3>
+        <p>Won the Innovative Engineering Competition by BEST Budapest (Fall 2026), where an energy services company set the challenge using its own data. Built a Streamlit app on an 8-sheet revenue workbook modeled as a star schema, with 10 data-quality rules, 10 workflow states, and a 4-quarter revenue forecast with what-if scenarios.</p>
+        <div class="project-card__stack">
+          <span class="stack-label">Stack</span>
+          <ul class="chips chips--sm"><li class="chip">Python</li><li class="chip">Streamlit</li><li class="chip">pandas</li><li class="chip">statsmodels</li><li class="chip">pytest</li></ul>
+        </div>
+        <a class="project-card__link" href="https://github.com/radiah23/energy-services-revenue-dashboard" target="_blank" rel="noopener">View on GitHub →</a>
+      </article>
 
       <!-- ── Social & Text Analytics ── -->
 
@@ -266,10 +313,10 @@
       <article class="project-card" data-cat="social">
         <span class="project-card__theme">Social &amp; Text Analytics</span>
         <h3>Hungarian Loanword Origins — Deep Learning (Team Project, Ongoing)</h3>
-        <p>Predicting whether a Hungarian word is native Uralic or a German, Slavic or Turkic loanword from its spelling alone; a character n-gram model reaches 0.609 macro-F1 on 980 subtitle words, over 4× the majority baseline, with a char-GRU close behind.</p>
+        <p>Predicting whether a Hungarian word is native Uralic or a German, Slavic or Turkic loanword from its spelling alone. Fine-tuning a BERT transformer (Hugging Face) against GRU and Markov baselines on 2,657 labeled loanwords; the best model so far reaches 0.609 macro-F1, over 4× the majority baseline.</p>
         <div class="project-card__stack">
           <span class="stack-label">Stack</span>
-          <ul class="chips chips--sm"><li class="chip">Python</li><li class="chip">PyTorch</li><li class="chip">scikit-learn</li><li class="chip">HuSpaCy</li><li class="chip">GRU</li></ul>
+          <ul class="chips chips--sm"><li class="chip">Python</li><li class="chip">PyTorch</li><li class="chip">Hugging Face</li><li class="chip">HuSpaCy</li><li class="chip">GRU</li></ul>
         </div>
         <a class="project-card__link" href="/hungarian-loanwords/">View Project Page →</a>
         <a class="project-card__link" href="https://github.com/inthecrowsnest/DeepLearningProject" target="_blank" rel="noopener" style="margin-top:4px;">View on GitHub →</a>
@@ -300,7 +347,7 @@
       <article class="project-card" data-cat="social">
         <span class="project-card__theme">Social &amp; Text Analytics</span>
         <h3>OkCupid Data Analysis</h3>
-        <p>Tested whether sex and sexual orientation predict reproductive intentions across 54K+ dating profiles; flagged incoherent profiles using Isolation Forest anomaly detection and assessed education–app-usage associations via chi-square testing.</p>
+        <p>Tested whether sex and sexual orientation predict reproductive intentions across 54K+ dating profiles with 2 logistic regression models; flagged 5.3% of profiles as incoherent using Isolation Forest anomaly detection and assessed education–app-usage associations via chi-square testing.</p>
         <div class="project-card__stack">
           <span class="stack-label">Stack</span>
           <ul class="chips chips--sm"><li class="chip">Python</li><li class="chip">scikit-learn</li><li class="chip">pandas</li><li class="chip">Isolation Forest</li></ul>
@@ -393,7 +440,7 @@
       <article class="project-card" data-cat="packages">
         <span class="project-card__theme">Packages</span>
         <h3>MassMedicaidPy (Team Project)</h3>
-        <p>Simplified Medicaid eligibility determination for Massachusetts residents — automates income validation for households of 8+ earning up to $162K against real Federal Poverty Level thresholds.</p>
+        <p>Simplified Medicaid eligibility determination for Massachusetts residents — automates income validation for households of 8+ earning up to $162K against real Federal Poverty Level thresholds, with 100% accuracy in pytest.</p>
         <div class="project-card__stack">
           <span class="stack-label">Stack</span>
           <ul class="chips chips--sm"><li class="chip">Python</li><li class="chip">pandas</li><li class="chip">pytest</li><li class="chip">PyPI Package</li></ul>
@@ -412,8 +459,8 @@
         <a class="project-card__link" href="https://github.com/radiah23/NGOReportR" target="_blank" rel="noopener">View on GitHub →</a>
       </article>
 
-      <article class="project-card" data-cat="dashboards">
-        <span class="project-card__theme">Dashboards</span>
+      <article class="project-card" data-cat="econ">
+        <span class="project-card__theme">Economics &amp; Networks</span>
         <h3>Systemic Risk: India Stocks</h3>
         <p>Tested whether PageRank-derived systemic risk scores predict actual market beta on Nifty 50 stocks — built a Java correlation-graph engine and validated with Python against live yfinance data.</p>
         <div class="project-card__stack">
@@ -432,6 +479,34 @@
       <h2>Honors &amp; Recognition</h2>
     </div>
     <ul class="honors-list">
+      <li class="honors-item">
+        <span class="honors-item__seal">✦</span>
+        <div>
+          <h3>Winner, Innovative Engineering Competition (INEC) by BEST Budapest</h3>
+          <p>Fall 2026 &middot; Energy Revenue Dashboard, team of 2</p>
+        </div>
+      </li>
+      <li class="honors-item">
+        <span class="honors-item__seal">✦</span>
+        <div>
+          <h3>Agentic AI Fellow, Break Through Tech (Incoming)</h3>
+          <p>January – May 2027 &middot; 16-week program to build, evaluate, and deploy AI agents (LangChain, LangGraph)</p>
+        </div>
+      </li>
+      <li class="honors-item">
+        <span class="honors-item__seal">✦</span>
+        <div>
+          <h3>National University of Singapore Exchange</h3>
+          <p>Spring 2027 &middot; One of two Smith College students selected</p>
+        </div>
+      </li>
+      <li class="honors-item">
+        <span class="honors-item__seal">✦</span>
+        <div>
+          <h3>Ignite Fellow, AI4ALL</h3>
+          <p>2026 &middot; Portfolio machine learning project</p>
+        </div>
+      </li>
       <li class="honors-item">
         <span class="honors-item__seal">✦</span>
         <div>
@@ -498,6 +573,7 @@
           <h3>Communication Intern</h3>
           <p class="involvement-card__org">Sep 2025–Jan 2026</p>
           <ul>
+            <li>Built an automated leaderboard for the Elevator Pitch 2025 competition (Google Apps Script, Forms, Sheets) that combined scores from 3 judges for 25+ participants, cutting manual scoring to almost zero.</li>
             <li>Drafted and managed the weekly newsletter, ensuring timely and engaging content delivery.</li>
             <li>Collaborated with the communications team to create social media graphics and posts.</li>
             <li>Conducted user behavior research to inform content strategy and enhance audience engagement.</li>
@@ -508,11 +584,11 @@
 
       <article class="involvement-card">
         <h3>Treasurer</h3>
-        <p class="involvement-card__org">Smithies in SDS &middot; 2025–2026</p>
+        <p class="involvement-card__org">Smithies in SDS, Smith College &middot; Sep 2025–May 2026</p>
         <ul>
-          <li>Manage annual budgeting for the club.</li>
-          <li>Organize events bridging upperclassmen and underclassmen in the SDS community.</li>
-          <li>Contribute to the planning and delivery of Python and SQL workshop series.</li>
+          <li>Managed the club's $1,000 annual budget.</li>
+          <li>Organized events bridging upperclassmen and underclassmen in the SDS community, reaching 30+ students with 94% satisfaction.</li>
+          <li>Helped plan and deliver a Python and SQL workshop series.</li>
         </ul>
       </article>
       <article class="involvement-card">
@@ -534,6 +610,53 @@
         </ul>
       </article>
     </div>
+  </section>
+
+  <!-- ===== Education (timeline) ===== -->
+  <section class="tabpanel wrap" id="panel-education">
+    <div class="section-head">
+      <h2>Education</h2>
+    </div>
+
+    <ol class="timeline">
+
+      <li class="tl-item" data-tag="research">
+        <div class="tl-item__marker"></div>
+        <div class="tl-item__date">Aug 2024 — May 2028 (Expected)</div>
+        <div class="tl-item__card">
+          <h3>B.A. in Statistical &amp; Data Sciences</h3>
+          <p class="tl-item__org">Smith College &middot; Northampton, MA &middot; CGPA 3.98/4.0 &middot; Dean's List 2024–25</p>
+          <ul>
+            <li>Coursework: Machine Learning, Multiple Regression, Probability &amp; Statistics, Advanced Programming with Python, Data Structures, Linear Algebra, Discrete Mathematics, Object-Oriented Programming, Community-Based Data Science, Micro- and Macroeconomics.</li>
+          </ul>
+        </div>
+      </li>
+
+      <li class="tl-item" data-tag="research">
+        <div class="tl-item__marker"></div>
+        <div class="tl-item__date">Fall 2026</div>
+        <div class="tl-item__card">
+          <h3>Exchange Semester</h3>
+          <p class="tl-item__org">Aquincum Institute of Technology &middot; Budapest, Hungary</p>
+          <ul>
+            <li>Coursework: Structure and Dynamics of Complex Networks, Deep Learning, Applied Cryptography.</li>
+          </ul>
+        </div>
+      </li>
+
+      <li class="tl-item" data-tag="research">
+        <div class="tl-item__marker"></div>
+        <div class="tl-item__date">Spring 2027</div>
+        <div class="tl-item__card">
+          <h3>Exchange Semester</h3>
+          <p class="tl-item__org">National University of Singapore &middot; Singapore</p>
+          <ul>
+            <li>Research with Prof. Kokil Jaidka's SMOL Project.</li>
+          </ul>
+        </div>
+      </li>
+
+    </ol>
   </section>
 
 </main>
